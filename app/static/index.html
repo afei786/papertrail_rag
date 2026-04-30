@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI知识库</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="noise-overlay"></div>
+    <main class="app-shell">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <header class="brand">
+          <div class="brand-text">
+            <div>
+              <h1>AI知识库</h1>
+              <p>文档问答工作台</p>
+            </div>
+          </div>
+          <button id="refreshDocuments" class="icon-button spin-on-click" type="button" title="刷新文档">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.87 4.4 2.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M12 2v3h-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <!-- Documents -->
+        <section class="side-section" id="projectSection">
+          <div class="section-header">
+            <h2 class="section-label">项目</h2>
+          </div>
+
+          <form id="uploadForm" class="upload-area">
+            <label class="file-drop-zone" id="dropZone">
+              <input id="fileInput" type="file" name="file" accept=".pdf,.docx,.txt,.md,.markdown" />
+              <div class="drop-content">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M9 11V3M6 6l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3 13v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span id="fileLabel">上传文件</span>
+              </div>
+              <button class="index-button" type="submit" id="indexBtn">索引</button>
+            </label>
+          </form>
+
+          <div id="uploadStatus" class="status-line"></div>
+          <div id="documentList" class="document-list"></div>
+        </section>
+
+        <!-- History -->
+        <section class="side-section history-section is-hidden" id="historySection">
+          <div class="section-header">
+            <button id="backToProjects" class="back-button" type="button">← </button>
+            <h2 class="section-label" id="historyTitle">对话历史</h2>
+            <span id="historyCount" class="history-badge"></span>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+      </aside>
+
+      <!-- Chat -->
+      <section class="chat-pane">
+        <header class="chat-header">
+          <div class="chat-header-meta">
+            <h2>AI知识库</h2>
+            <div class="status-pill">
+              <span class="status-dot"></span>
+              <span id="answerStatus">就绪</span>
+            </div>
+          </div>
+          <button id="newConversation" class="new-chat-button" type="button">
+            新对话
+          </button>
+        </header>
+
+        <section id="conversation" class="conversation">
+          <div class="empty-state">
+            <h3>选择项目，让我们开始...</h3>
+            <p>从左侧上传并索引文件，创建项目后选择项目，再开始对话。</p>
+            <div class="hint-chips">
+              <span class="chip">📄 支持 PDF、Word、Markdown</span>
+              <span class="chip">🔗 引用溯源</span>
+              <span class="chip">💬 多轮对话</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="composer-wrapper">
+          <form id="queryForm" class="composer is-locked">
+            <textarea id="questionInput" rows="2" placeholder="进入项目后开始对话" disabled></textarea>
+            <div class="composer-footer">
+              <label class="topk-control" title="检索段落数量">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="6" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.2"/>
+                  <path d="M1 11.5c.8-2 2.8-3 5-3s4.2 1 5 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                <span>Top‑K</span>
+                <input id="topKInput" type="number" min="1" max="20" value="5" disabled />
+              </label>
+              <button class="send-button" type="submit" id="sendBtn" disabled>
+                <span class="send-label">发送</span>
+                <svg class="send-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <path d="M13 7.5H2M8.5 3 13 7.5 8.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [["$", "$"], ["\\(", "\\)"]],
+          displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+          processEscapes: true
+        },
+        svg: {
+          fontCache: "global"
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script defer src="/static/app.js"></script>
+  </body>
+</html>
